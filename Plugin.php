@@ -30,27 +30,27 @@ class Plugin extends Base
 
     public function getPluginName()
     {
-        return 'OAuth2';
+        return 'OAuth2 IPB';
     }
 
     public function getPluginDescription()
     {
-        return t('Generic OAuth2 authentication plugin');
+        return t('IPB OAuth2 authentication plugin');
     }
 
     public function getPluginAuthor()
     {
-        return 'Frédéric Guillot';
+        return 'Werner Maisl';
     }
 
     public function getPluginVersion()
     {
-        return '1.0.1';
+        return '1.0.0';
     }
 
     public function getPluginHomepage()
     {
-        return 'https://github.com/kanboard/plugin-oauth2';
+        return 'https://github.com/Aurorastation/plugin-oauth2';
     }
 
     public function getCompatibleVersion()

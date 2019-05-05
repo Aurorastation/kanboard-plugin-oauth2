@@ -125,12 +125,25 @@ class GenericOAuth2Provider extends Base implements OAuthAuthenticationProviderI
 
         if (DEBUG) {
             $this->logger->debug(__METHOD__.': Got access token: '.(empty($token) ? 'No' : 'Yes'));
-            $this->logger->debug(__METHOD__.': Fetch user profile from '.$this->getUserAPiUrl());
+            $this->logger->debug(__METHOD__.': Fetch user id from '.$this->getUserAPiUrl());
         }
 
-        return $this->httpClient->getJson(
+        $response1 = $this->httpClient->getJson(
             $this->getUserAPiUrl(),
             array($this->getService()->getAuthorizationHeader())
+        );
+        $userId = $response1["id"];
+        $userProfileApiUrl = $this->getUserProfileAPiUrl($userId);
+
+        if(DEBUG){
+            $this->logger->debug(__METHOD__.': Got UserId: '.$userId);
+            $this->logger->debug(__METHOD__.': Fetch user profile from '.$userProfileApiUrl);
+        }
+        $userProfileApiUrl = $userProfileApiUrl."?key=".$this->getIPbAPiKey();
+
+        return  $this->httpClient->getJson(
+            $userProfileApiUrl,
+            array()
         );
     }
 
@@ -184,6 +197,17 @@ class GenericOAuth2Provider extends Base implements OAuthAuthenticationProviderI
     }
 
     /**
+     * Get base url
+     *
+     * @access public
+     * @return string
+     */
+    public function getIPbBaseUrl()
+    {
+        return $this->configModel->get('oauth2_ipb_base_url');
+    }
+
+    /**
      * Get authorize url
      *
      * @access public
@@ -191,7 +215,7 @@ class GenericOAuth2Provider extends Base implements OAuthAuthenticationProviderI
      */
     public function getOAuthAuthorizeUrl()
     {
-        return $this->configModel->get('oauth2_authorize_url');
+        return $this->getIPbBaseUrl().'oauth/authorize/';
     }
 
     /**
@@ -202,7 +226,7 @@ class GenericOAuth2Provider extends Base implements OAuthAuthenticationProviderI
      */
     public function getOAuthTokenUrl()
     {
-        return $this->configModel->get('oauth2_token_url');
+        return $this->getIPbBaseUrl().'oauth/token/';
     }
 
     /**
@@ -213,6 +237,29 @@ class GenericOAuth2Provider extends Base implements OAuthAuthenticationProviderI
      */
     public function getUserAPiUrl()
     {
-        return $this->configModel->get('oauth2_user_api_url');
+        return $this->getIPbBaseUrl().'api/core/me';
+    }
+
+    /**
+     * Get User Profile API url
+     *
+     * @param $userId ID of the User
+     * @access public
+     * @return string
+     */
+    public function getUserProfileAPiUrl($userId)
+    {
+        return $this->getIPbBaseUrl().'api/core/members/'.$userId;
+    }
+
+    /**
+     * Get User API Key
+     *
+     * @access public
+     * @return string
+     */
+    public function getIPbAPiKey()
+    {
+        return $this->configModel->get('oauth2_ipb_api_key');
     }
 }

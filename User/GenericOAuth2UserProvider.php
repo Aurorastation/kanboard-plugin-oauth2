@@ -52,7 +52,7 @@ class GenericOAuth2UserProvider extends Base implements UserProviderInterface
     public function getUsername()
     {
         if ($this->isUserCreationAllowed()) {
-            return $this->getKey('oauth2_key_username');
+            return $this->getUserData('name');
         }
 
         return '';
@@ -108,7 +108,7 @@ class GenericOAuth2UserProvider extends Base implements UserProviderInterface
      */
     public function getExternalId()
     {
-        return $this->getKey('oauth2_key_user_id');
+        return $this->getUserData('id');
     }
 
     /**
@@ -132,7 +132,7 @@ class GenericOAuth2UserProvider extends Base implements UserProviderInterface
      */
     public function getName()
     {
-        return $this->getKey('oauth2_key_name');
+        return $this->getUserData('name');
     }
 
     /**
@@ -143,7 +143,7 @@ class GenericOAuth2UserProvider extends Base implements UserProviderInterface
      */
     public function getEmail()
     {
-        return $this->getKey('oauth2_key_email');
+        return $this->getUserData('email');
     }
 
     /**
@@ -157,11 +157,16 @@ class GenericOAuth2UserProvider extends Base implements UserProviderInterface
      */
     public function getExternalGroupIds()
     {
-        $groups = $this->getKey('oauth2_key_groups');
+        //Get the primary and secondary group array
+        $primaryGroup = $this->getUserData('primaryGroup');
+        $secondaryGroups = $this->getUserData('secondaryGroups');
 
-        if (empty($groups)) {
-            $this->logger->debug('OAuth2: '.$this->getUsername().' has no groups');
-            return array();
+        //Extrat the group names
+        $groups = array();
+        $groups[] = $primaryGroup['name'];
+
+        foreach($secondaryGroups as $secondaryGroup){
+            $groups[] = $secondaryGroup['name'];
         }
 
         $groups = array_unique($groups);
@@ -220,6 +225,11 @@ class GenericOAuth2UserProvider extends Base implements UserProviderInterface
     protected function getKey($key)
     {
         $key = $this->configModel->get($key);
+        return ! empty($key) && isset($this->userData[$key]) ? $this->userData[$key] : '';
+    }
+
+    protected function getUserData($key)
+    {
         return ! empty($key) && isset($this->userData[$key]) ? $this->userData[$key] : '';
     }
 }
